@@ -10,7 +10,10 @@ import os
 
 # Import our custom modules
 from database import AttendanceDatabase
-from face_recognition_module_simple import SimpleFaceRecognitionModule as FaceRecognitionModule
+try:
+    from enhanced_face_recognition_module import EnhancedFaceRecognitionModule as FaceRecognitionModule
+except ImportError:
+    from face_recognition_module_simple import SimpleFaceRecognitionModule as FaceRecognitionModule
 from camera_module import CameraModule
 from student_management import StudentManagement
 from attendance_tracker import AttendanceTracker
@@ -18,9 +21,9 @@ from attendance_tracker import AttendanceTracker
 class FacialAttendanceSystem:
     def __init__(self, root):
         self.root = root
-        self.root.title("🎯 Facial Attendance Recognition System")
+        self.root.title("Face-It: Advanced Facial Attendance System")
         self.root.geometry("1400x900")
-        self.root.configure(bg='#f5f5f5')
+        self.root.configure(bg='#f8f9fa')
         
         # Configure modern styling
         self.configure_styles()
@@ -57,28 +60,50 @@ class FacialAttendanceSystem:
         """Configure modern styling for the application"""
         style = ttk.Style()
         
+        # Professional Dark Corporate Theme
+        bg_color = '#121212'         # Deep Dark
+        header_color = '#1a1a1a'     # Surface Dark
+        accent_color = '#3498db'     # Arctic Blue
+        card_color = '#1e1e1e'       # Card Background
+        text_color = '#ecf0f1'       # Off-white Text
+        muted_text = '#95a5a6'       # Muted Text
+        success_color = '#2ecc71'
+        warning_color = '#f1c40f'
+        danger_color = '#e74c3c'
+        
         # Configure notebook style
-        style.configure('TNotebook', background='#f5f5f5')
-        style.configure('TNotebook.Tab', padding=[20, 10], font=('Arial', 10, 'bold'))
+        style.configure('TNotebook', background=bg_color, borderwidth=0)
+        style.configure('TNotebook.Tab', padding=[25, 12], font=('Segoe UI', 10))
+        style.map('TNotebook.Tab', 
+                 background=[('selected', card_color), ('!selected', header_color)],
+                 foreground=[('selected', accent_color), ('!selected', muted_text)])
         
         # Configure frame styles
-        style.configure('Card.TFrame', background='white', relief='solid', borderwidth=1)
-        style.configure('Header.TFrame', background='#0078d4', relief='flat')
+        style.configure('TFrame', background=bg_color)
+        style.configure('Card.TFrame', background=card_color, relief='flat', borderwidth=0)
+        style.configure('Header.TFrame', background=header_color, relief='flat')
         
         # Configure label styles
-        style.configure('Title.TLabel', font=('Arial', 24, 'bold'), background='#0078d4', foreground='white')
-        style.configure('Subtitle.TLabel', font=('Arial', 14, 'bold'), background='#0078d4', foreground='white')
-        style.configure('Info.TLabel', font=('Arial', 11), background='#0078d4', foreground='white')
+        style.configure('TLabel', background=bg_color, foreground=text_color)
+        style.configure('Title.TLabel', font=('Segoe UI', 26, 'bold'), background=header_color, foreground='white')
+        style.configure('Subtitle.TLabel', font=('Segoe UI', 14), background=header_color, foreground=accent_color)
+        style.configure('Info.TLabel', font=('Segoe UI', 10), background=header_color, foreground=muted_text)
         
-        # Configure button styles - minimal original design
-        style.configure('Primary.TButton', font=('Arial', 10, 'bold'), padding=[10, 5])
-        style.configure('Success.TButton', font=('Arial', 10, 'bold'), padding=[10, 5])
-        style.configure('Warning.TButton', font=('Arial', 10, 'bold'), padding=[10, 5])
-        style.configure('Danger.TButton', font=('Arial', 10, 'bold'), padding=[10, 5])
+        # Configure button styles
+        style.configure('TButton', font=('Segoe UI', 10), padding=[15, 8])
+        style.configure('Primary.TButton', background=accent_color)
+        style.configure('Success.TButton', foreground=success_color)
+        style.configure('Warning.TButton', foreground=warning_color)
+        style.configure('Danger.TButton', foreground=danger_color)
         
-        # Configure label frame styles - minimal original design
-        style.configure('Card.TLabelframe', background='#f0f0f0', relief='flat', borderwidth=0)
-        style.configure('Card.TLabelframe.Label', font=('Arial', 10, 'bold'), background='#f0f0f0')
+        # Configure label frame styles
+        style.configure('TLabelframe', background=card_color, borderwidth=1, relief='solid', bordercolor='#333333')
+        style.configure('TLabelframe.Label', font=('Segoe UI', 11, 'bold'), background=card_color, foreground=accent_color)
+        
+        # Treeview styling
+        style.configure('Treeview', font=('Segoe UI', 10), rowheight=35, background=card_color, 
+                        fieldbackground=card_color, foreground=text_color)
+        style.configure('Treeview.Heading', font=('Segoe UI', 10, 'bold'), background='#2d2d2d', foreground='white')
     
     def load_known_faces(self):
         """Load known faces from database"""
@@ -86,37 +111,50 @@ class FacialAttendanceSystem:
         self.face_recognition_module.load_known_faces(students)
     
     def setup_ui(self):
-        """Setup the main user interface"""
+        """Setup the main user interface with clear layout separation"""
         # Create main container
-        main_container = ttk.Frame(self.root)
-        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        main_container = tk.Frame(self.root, bg='#121212')
+        main_container.pack(fill=tk.BOTH, expand=True)
         
-        # Header frame with gradient effect
-        header_frame = ttk.Frame(main_container, style='Header.TFrame')
-        header_frame.pack(fill=tk.X, pady=(0, 20))
+        # Header frame - using a fixed height and clear packing
+        header_frame = tk.Frame(main_container, bg='#1a1a1a', height=140)
+        header_frame.pack(side=tk.TOP, fill=tk.X)
+        header_frame.pack_propagate(False) # Maintain height
         
-        # Title with emoji
-        title_label = ttk.Label(header_frame, text="🎯 Facial Attendance Recognition System", 
-                               style='Title.TLabel', foreground='white')
-        title_label.pack(pady=20)
+        # Header content
+        header_content = tk.Frame(header_frame, bg='#1a1a1a')
+        header_content.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
-        # Subtitle
-        subtitle_label = ttk.Label(header_frame, text="Advanced AI-Powered Student Attendance Management", 
-                                  style='Info.TLabel', foreground='white')
-        subtitle_label.pack(pady=(0, 20))
+        # Title - Large and professional
+        title_label = tk.Label(header_content, text="Face-It", 
+                             font=('Segoe UI', 28, 'bold'), bg='#1a1a1a', fg='white')
+        title_label.pack()
+        
+        # Subtitle - Arctic Blue accent
+        subtitle_label = tk.Label(header_content, text="Advanced AI-Powered Attendance Management", 
+                                 font=('Segoe UI', 12), bg='#1a1a1a', fg='#3498db')
+        subtitle_label.pack(pady=(0, 5))
+        
+        # Separator line
+        sep = tk.Frame(main_container, height=1, bg='#333333')
+        sep.pack(fill=tk.X)
+        
+        # Content Area - using a dedicated frame for the notebook
+        content_frame = tk.Frame(main_container, bg='#121212', padx=30, pady=30)
+        content_frame.pack(fill=tk.BOTH, expand=True)
         
         # Create notebook for tabs
-        self.notebook = ttk.Notebook(main_container)
+        self.notebook = ttk.Notebook(content_frame)
         self.notebook.pack(fill=tk.BOTH, expand=True)
         
-        # Create tabs with emojis
+        # Create tabs
         self.create_dashboard_tab()
         self.create_camera_tab()
         self.create_students_tab()
         self.create_attendance_tab()
         self.create_reports_tab()
         
-        # Keep original tab names without emojis
+        # Set tab names
         self.notebook.tab(0, text="Dashboard")
         self.notebook.tab(1, text="Camera View")
         self.notebook.tab(2, text="Students")
@@ -135,7 +173,7 @@ class FacialAttendanceSystem:
     
     def create_dashboard_tab(self):
         """Create the main dashboard tab"""
-        dashboard_frame = ttk.Frame(self.notebook)
+        dashboard_frame = ttk.Frame(self.notebook, padding=20)
         self.notebook.add(dashboard_frame, text="Dashboard")
         
         # Dashboard content
@@ -148,11 +186,11 @@ class FacialAttendanceSystem:
         camera_btn_frame.pack(fill=tk.X)
         
         self.start_camera_btn = ttk.Button(camera_btn_frame, text="Start Camera", 
-                                          command=self.start_camera)
+                                          style='Success.TButton', command=self.start_camera)
         self.start_camera_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.stop_camera_btn = ttk.Button(camera_btn_frame, text="Stop Camera", 
-                                         command=self.stop_camera, state=tk.DISABLED)
+                                         style='Danger.TButton', command=self.stop_camera, state=tk.DISABLED)
         self.stop_camera_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         # Camera info
@@ -168,15 +206,15 @@ class FacialAttendanceSystem:
         tracking_btn_frame.pack(fill=tk.X)
         
         self.start_tracking_btn = ttk.Button(tracking_btn_frame, text="Start Tracking", 
-                                            command=self.start_tracking, state=tk.DISABLED)
+                                            style='Success.TButton', command=self.start_tracking, state=tk.DISABLED)
         self.start_tracking_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.stop_tracking_btn = ttk.Button(tracking_btn_frame, text="Stop Tracking", 
-                                           command=self.stop_tracking, state=tk.DISABLED)
+                                           style='Danger.TButton', command=self.stop_tracking, state=tk.DISABLED)
         self.stop_tracking_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.reset_session_btn = ttk.Button(tracking_btn_frame, text="Reset Session", 
-                                           command=self.reset_session)
+                                           style='Warning.TButton', command=self.reset_session)
         self.reset_session_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         # Statistics section
@@ -189,20 +227,20 @@ class FacialAttendanceSystem:
         
         # Row 1
         ttk.Label(stats_grid, text="Total Students:").grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        self.total_students_label = ttk.Label(stats_grid, text="0", font=('Arial', 12, 'bold'))
+        self.total_students_label = ttk.Label(stats_grid, text="0", font=('Segoe UI', 12, 'bold'))
         self.total_students_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 40))
         
         ttk.Label(stats_grid, text="Currently Present:").grid(row=0, column=2, sticky=tk.W, padx=(0, 20))
-        self.current_present_label = ttk.Label(stats_grid, text="0", font=('Arial', 12, 'bold'))
+        self.current_present_label = ttk.Label(stats_grid, text="0", font=('Segoe UI', 12, 'bold'))
         self.current_present_label.grid(row=0, column=3, sticky=tk.W, padx=(0, 40))
         
         # Row 2
         ttk.Label(stats_grid, text="Present Today:").grid(row=1, column=0, sticky=tk.W, padx=(0, 20), pady=(10, 0))
-        self.present_today_label = ttk.Label(stats_grid, text="0", font=('Arial', 12, 'bold'))
+        self.present_today_label = ttk.Label(stats_grid, text="0", font=('Segoe UI', 12, 'bold'))
         self.present_today_label.grid(row=1, column=1, sticky=tk.W, padx=(0, 40), pady=(10, 0))
         
         ttk.Label(stats_grid, text="Attendance %:").grid(row=1, column=2, sticky=tk.W, padx=(0, 20), pady=(10, 0))
-        self.attendance_percent_label = ttk.Label(stats_grid, text="0%", font=('Arial', 12, 'bold'))
+        self.attendance_percent_label = ttk.Label(stats_grid, text="0%", font=('Segoe UI', 12, 'bold'))
         self.attendance_percent_label.grid(row=1, column=3, sticky=tk.W, padx=(0, 40), pady=(10, 0))
         
         # Session info
@@ -213,20 +251,20 @@ class FacialAttendanceSystem:
         session_grid.pack(fill=tk.X)
         
         ttk.Label(session_grid, text="Session Duration:").grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        self.session_duration_label = ttk.Label(session_grid, text="00:00:00", font=('Arial', 12, 'bold'))
+        self.session_duration_label = ttk.Label(session_grid, text="00:00:00", font=('Segoe UI', 12, 'bold'))
         self.session_duration_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 40))
         
         ttk.Label(session_grid, text="Total Entries:").grid(row=0, column=2, sticky=tk.W, padx=(0, 20))
-        self.total_entries_label = ttk.Label(session_grid, text="0", font=('Arial', 12, 'bold'))
-        self.total_entries_label.grid(row=0, column=2, sticky=tk.W, padx=(0, 40))
+        self.total_entries_label = ttk.Label(session_grid, text="0", font=('Segoe UI', 12, 'bold'))
+        self.total_entries_label.grid(row=0, column=3, sticky=tk.W, padx=(0, 40))
         
-        ttk.Label(session_grid, text="Total Exits:").grid(row=0, column=3, sticky=tk.W, padx=(0, 20))
-        self.total_exits_label = ttk.Label(session_grid, text="0", font=('Arial', 12, 'bold'))
-        self.total_exits_label.grid(row=0, column=3, sticky=tk.W, padx=(0, 40))
+        ttk.Label(session_grid, text="Total Exits:").grid(row=0, column=4, sticky=tk.W, padx=(0, 20))
+        self.total_exits_label = ttk.Label(session_grid, text="0", font=('Segoe UI', 12, 'bold'))
+        self.total_exits_label.grid(row=0, column=5, sticky=tk.W, padx=(0, 40))
     
     def create_camera_tab(self):
         """Create the camera view tab"""
-        camera_frame = ttk.Frame(self.notebook)
+        camera_frame = ttk.Frame(self.notebook, padding=20)
         self.notebook.add(camera_frame, text="Camera View")
         
         # Camera view section
@@ -276,12 +314,12 @@ class FacialAttendanceSystem:
         
         # Apply settings button
         self.apply_settings_btn = ttk.Button(settings_grid, text="Apply Settings", 
-                                            command=self.apply_camera_settings)
+                                            style='Primary.TButton', command=self.apply_camera_settings)
         self.apply_settings_btn.grid(row=0, column=4, padx=(20, 0))
     
     def create_students_tab(self):
         """Create the students management tab"""
-        students_frame = ttk.Frame(self.notebook)
+        students_frame = ttk.Frame(self.notebook, padding=20)
         self.notebook.add(students_frame, text="Students")
         
         # Add student section
@@ -311,16 +349,16 @@ class FacialAttendanceSystem:
         
         # Row 2 - Buttons
         self.capture_photo_btn = ttk.Button(form_frame, text="Capture Photo", 
-                                           command=self.capture_student_photo)
+                                           style='Primary.TButton', command=self.capture_student_photo)
         self.capture_photo_btn.grid(row=1, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
         
         self.load_photo_btn = ttk.Button(form_frame, text="Load Photo", 
-                                        command=self.load_student_photo)
+                                        style='Primary.TButton', command=self.load_student_photo)
         self.load_photo_btn.grid(row=1, column=1, sticky=tk.W, padx=(0, 10), pady=(10, 0))
         
         # Add student button
         self.add_student_btn = ttk.Button(form_frame, text="Add Student", 
-                                         command=self.add_student)
+                                         style='Success.TButton', command=self.add_student)
         self.add_student_btn.grid(row=2, column=0, columnspan=4, pady=(10, 0))
         
         # Student list section
@@ -336,10 +374,10 @@ class FacialAttendanceSystem:
         self.search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=30)
         self.search_entry.pack(side=tk.LEFT, padx=(0, 10))
         
-        self.search_btn = ttk.Button(search_frame, text="Search", command=self.search_students)
+        self.search_btn = ttk.Button(search_frame, text="Search", style='Primary.TButton', command=self.search_students)
         self.search_btn.pack(side=tk.LEFT, padx=(0, 10))
         
-        self.clear_search_btn = ttk.Button(search_frame, text="Clear", command=self.clear_search)
+        self.clear_search_btn = ttk.Button(search_frame, text="Clear", style='Warning.TButton', command=self.clear_search)
         self.clear_search_btn.pack(side=tk.LEFT)
         
         # Student treeview
@@ -362,15 +400,15 @@ class FacialAttendanceSystem:
         action_frame.pack(fill=tk.X, pady=(10, 0))
         
         self.export_students_btn = ttk.Button(action_frame, text="Export Students", 
-                                             command=self.export_students)
+                                             style='Primary.TButton', command=self.export_students)
         self.export_students_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.delete_student_btn = ttk.Button(action_frame, text="Delete Selected", 
-                                            command=self.delete_selected_student)
+                                            style='Danger.TButton', command=self.delete_selected_student)
         self.delete_student_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.refresh_students_btn = ttk.Button(action_frame, text="Refresh List", 
-                                              command=self.refresh_student_list)
+                                              style='Warning.TButton', command=self.refresh_student_list)
         self.refresh_students_btn.pack(side=tk.LEFT)
         
         # Load initial student list
@@ -378,7 +416,7 @@ class FacialAttendanceSystem:
     
     def create_attendance_tab(self):
         """Create the attendance tracking tab"""
-        attendance_frame = ttk.Frame(self.notebook)
+        attendance_frame = ttk.Frame(self.notebook, padding=20)
         self.notebook.add(attendance_frame, text="Attendance")
         
         # Real-time attendance section
@@ -424,16 +462,16 @@ class FacialAttendanceSystem:
         log_controls_frame.pack(fill=tk.X, pady=(10, 0))
         
         self.clear_log_btn = ttk.Button(log_controls_frame, text="Clear Log", 
-                                       command=self.clear_attendance_log)
+                                       style='Warning.TButton', command=self.clear_attendance_log)
         self.clear_log_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.export_log_btn = ttk.Button(log_controls_frame, text="Export Log", 
-                                        command=self.export_attendance_log)
+                                        style='Primary.TButton', command=self.export_attendance_log)
         self.export_log_btn.pack(side=tk.LEFT)
     
     def create_reports_tab(self):
         """Create the reports tab"""
-        reports_frame = ttk.Frame(self.notebook)
+        reports_frame = ttk.Frame(self.notebook, padding=20)
         self.notebook.add(reports_frame, text="Reports")
         
         # Daily summary section
@@ -451,11 +489,11 @@ class FacialAttendanceSystem:
         self.report_date_entry.pack(side=tk.LEFT, padx=(0, 20))
         
         self.generate_summary_btn = ttk.Button(summary_display_frame, text="Generate Summary", 
-                                             command=self.generate_daily_summary)
+                                             style='Primary.TButton', command=self.generate_daily_summary)
         self.generate_summary_btn.pack(side=tk.LEFT, padx=(0, 20))
         
         self.export_summary_btn = ttk.Button(summary_display_frame, text="Export Summary", 
-                                            command=self.export_daily_summary)
+                                            style='Success.TButton', command=self.export_daily_summary)
         self.export_summary_btn.pack(side=tk.LEFT)
         
         # Summary results
@@ -481,11 +519,11 @@ class FacialAttendanceSystem:
         self.end_date_entry.pack(side=tk.LEFT, padx=(0, 20))
         
         self.generate_history_btn = ttk.Button(range_frame, text="Generate Report", 
-                                             command=self.generate_attendance_history)
+                                             style='Primary.TButton', command=self.generate_attendance_history)
         self.generate_history_btn.pack(side=tk.LEFT, padx=(0, 20))
         
         self.export_history_btn = ttk.Button(range_frame, text="Export Report", 
-                                            command=self.export_attendance_history)
+                                            style='Success.TButton', command=self.export_attendance_history)
         self.export_history_btn.pack(side=tk.LEFT)
         
         # History results

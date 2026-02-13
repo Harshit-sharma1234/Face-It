@@ -526,6 +526,32 @@ class EnhancedFaceRecognitionModule:
             self.logger.error(f"Error getting face encoding: {e}")
             return None
     
+    def add_multiple_face_angles(self, face_images: List[np.ndarray], name: str, student_id: int) -> bool:
+        """Add multiple face angles for better recognition"""
+        try:
+            successful_encodings = 0
+            
+            for i, face_image in enumerate(face_images):
+                # Detect and add face
+                if self.add_new_face(face_image, name, student_id):
+                    successful_encodings += 1
+            
+            if successful_encodings > 0:
+                self.logger.info(f"Successfully added {successful_encodings} face encodings for {name}")
+                return True
+            else:
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Error adding multiple face angles: {e}")
+            return False
+
+    def _create_face_variations(self, face_encoding: np.ndarray) -> List[np.ndarray]:
+        """Create variations of a face encoding for better recognition (placeholder for compatibility)"""
+        # For the enhanced module using face_recognition lib, variations aren't as simple as image transforms
+        # But we return a list with the original for compatibility
+        return [face_encoding]
+
     def optimize_performance(self):
         """Optimize performance based on detection statistics"""
         stats = self.get_detection_stats()

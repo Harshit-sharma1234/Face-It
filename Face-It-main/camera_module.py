@@ -23,6 +23,12 @@ class CameraModule:
         
         # Determine platform for backend handling
         self.is_windows = platform.system().lower().startswith('win')
+        
+        # Suppress OpenCV diagnostic output
+        try:
+            cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+        except Exception:
+            pass
     
     def _create_capture(self, index: int) -> Optional[cv2.VideoCapture]:
         """Create a VideoCapture with backends suitable for the OS."""
@@ -206,22 +212,26 @@ class CameraModule:
             return frame
         return None
     
-    def list_available_cameras(self, max_cameras: int = 10) -> list:
-        """List available camera indices"""
+    def list_available_cameras(self) -> list:
+        """List available camera indices with zero terminal noise"""
         available_cameras = []
         
-        for i in range(max_cameras):
-            try:
-                cap = self._create_capture(i)
-                if cap and cap.isOpened():
-                    available_cameras.append(i)
-                    cap.release()
-            except Exception as e:
-                # Silently continue if camera fails
-                continue
+        # On macOS, index 0 is almost always the active camera.
+        # We check it directly first to avoid any 'searching' logs.
+        cap = self._create_capture(0)
+        if cap and cap.isOpened():
+            available_cameras.append(0)
+            cap.release()
+            return available_cameras
+            
+        # If 0 wasn't found, check a very limited range
+        for i in range(1, 3):
+            cap = self._create_capture(i)
+            if cap and cap.isOpened():
+                available_cameras.append(i)
+                cap.release()
         
-        # If no cameras found, return default indices
         if not available_cameras:
-            available_cameras = [0, 1, 2]  # Default indices to try
-        
+            available_cameras = [0]
+            
         return available_cameras
