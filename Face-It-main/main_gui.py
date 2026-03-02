@@ -57,53 +57,68 @@ class FacialAttendanceSystem:
         self.update_ui()
     
     def configure_styles(self):
-        """Configure modern styling for the application"""
+        """Configure professional modern styling for the application"""
         style = ttk.Style()
         
-        # Professional Dark Corporate Theme
-        bg_color = '#121212'         # Deep Dark
-        header_color = '#1a1a1a'     # Surface Dark
-        accent_color = '#3498db'     # Arctic Blue
-        card_color = '#1e1e1e'       # Card Background
-        text_color = '#ecf0f1'       # Off-white Text
-        muted_text = '#95a5a6'       # Muted Text
-        success_color = '#2ecc71'
-        warning_color = '#f1c40f'
-        danger_color = '#e74c3c'
+        # Professional Dark Theme Palette
+        self.bg_color = '#0F111A'      # Deep Deep Navy/Black
+        self.sidebar_color = '#161925' # Sidebar background
+        self.accent_color = '#007AFF'  # iOS/Professional Blue
+        self.surface_color = '#1C1C26' # Card/Header Surface
+        self.text_color = '#FFFFFF'    # White
+        self.muted_text = '#9499B0'    # Muted Blue-Grey
+        self.success_color = '#34C759'
+        self.warning_color = '#FF9F0A'
+        self.danger_color = '#FF3B30'
+        self.border_color = '#2A2D3E'
         
-        # Configure notebook style
-        style.configure('TNotebook', background=bg_color, borderwidth=0)
-        style.configure('TNotebook.Tab', padding=[25, 12], font=('Segoe UI', 10))
-        style.map('TNotebook.Tab', 
-                 background=[('selected', card_color), ('!selected', header_color)],
-                 foreground=[('selected', accent_color), ('!selected', muted_text)])
+        # Modern Font Stack
+        self.font_family = "Inter" if "Inter" in self.root.tk.call('font', 'families') else "Segoe UI"
+        self.header_font = (self.font_family, 12, 'bold')
+        self.title_font = (self.font_family, 24, 'bold')
+        self.body_font = (self.font_family, 10)
+        self.small_font = (self.font_family, 9)
+        
+        # Configure notebook style (though we'll move to sidebar, keeping styles for compat)
+        style.configure('TNotebook', background=self.bg_color, borderwidth=0)
+        style.configure('TNotebook.Tab', padding=[20, 10], font=self.body_font)
         
         # Configure frame styles
-        style.configure('TFrame', background=bg_color)
-        style.configure('Card.TFrame', background=card_color, relief='flat', borderwidth=0)
-        style.configure('Header.TFrame', background=header_color, relief='flat')
+        style.configure('TFrame', background=self.bg_color)
+        style.configure('Sidebar.TFrame', background=self.sidebar_color)
+        style.configure('Card.TFrame', background=self.surface_color, relief='flat')
+        style.configure('Header.TFrame', background=self.surface_color, relief='flat')
         
         # Configure label styles
-        style.configure('TLabel', background=bg_color, foreground=text_color)
-        style.configure('Title.TLabel', font=('Segoe UI', 26, 'bold'), background=header_color, foreground='white')
-        style.configure('Subtitle.TLabel', font=('Segoe UI', 14), background=header_color, foreground=accent_color)
-        style.configure('Info.TLabel', font=('Segoe UI', 10), background=header_color, foreground=muted_text)
+        style.configure('TLabel', background=self.bg_color, foreground=self.text_color, font=self.body_font)
+        style.configure('Sidebar.TLabel', background=self.sidebar_color, foreground=self.text_color, font=self.body_font)
+        style.configure('Title.TLabel', font=self.title_font, background=self.bg_color, foreground=self.text_color)
+        style.configure('Subtitle.TLabel', font=(self.font_family, 14), background=self.bg_color, foreground=self.accent_color)
+        style.configure('Header.TLabel', font=self.header_font, background=self.surface_color, foreground=self.text_color)
+        style.configure('Muted.TLabel', font=self.small_font, background=self.bg_color, foreground=self.muted_text)
         
         # Configure button styles
-        style.configure('TButton', font=('Segoe UI', 10), padding=[15, 8])
-        style.configure('Primary.TButton', background=accent_color)
-        style.configure('Success.TButton', foreground=success_color)
-        style.configure('Warning.TButton', foreground=warning_color)
-        style.configure('Danger.TButton', foreground=danger_color)
+        style.configure('TButton', font=self.body_font, padding=[15, 8])
+        style.configure('Sidebar.TButton', font=self.body_font, padding=[20, 12], width=20)
         
-        # Configure label frame styles
-        style.configure('TLabelframe', background=card_color, borderwidth=1, relief='solid', bordercolor='#333333')
-        style.configure('TLabelframe.Label', font=('Segoe UI', 11, 'bold'), background=card_color, foreground=accent_color)
+        # Treeview styling - Professional look
+        style.configure('Treeview', 
+                        font=self.body_font, 
+                        rowheight=40, 
+                        background=self.surface_color, 
+                        fieldbackground=self.surface_color, 
+                        foreground=self.text_color,
+                        borderwidth=0)
+        style.configure('Treeview.Heading', 
+                        font=self.header_font, 
+                        background=self.border_color, 
+                        foreground=self.text_color,
+                        relief='flat')
+        style.map('Treeview', background=[('selected', self.accent_color)])
         
-        # Treeview styling
-        style.configure('Treeview', font=('Segoe UI', 10), rowheight=35, background=card_color, 
-                        fieldbackground=card_color, foreground=text_color)
-        style.configure('Treeview.Heading', font=('Segoe UI', 10, 'bold'), background='#2d2d2d', foreground='white')
+        # Configure labelframe
+        style.configure('TLabelframe', background=self.surface_color, bordercolor=self.border_color, borderwidth=1)
+        style.configure('TLabelframe.Label', font=self.header_font, background=self.surface_color, foreground=self.accent_color)
     
     def load_known_faces(self):
         """Load known faces from database"""
@@ -111,55 +126,78 @@ class FacialAttendanceSystem:
         self.face_recognition_module.load_known_faces(students)
     
     def setup_ui(self):
-        """Setup the main user interface with clear layout separation"""
+        """Setup the main user interface with a professional sidebar layout"""
         # Create main container
-        main_container = tk.Frame(self.root, bg='#121212')
-        main_container.pack(fill=tk.BOTH, expand=True)
+        self.main_container = tk.Frame(self.root, bg=self.bg_color)
+        self.main_container.pack(fill=tk.BOTH, expand=True)
         
-        # Header frame - using a fixed height and clear packing
-        header_frame = tk.Frame(main_container, bg='#1a1a1a', height=140)
-        header_frame.pack(side=tk.TOP, fill=tk.X)
-        header_frame.pack_propagate(False) # Maintain height
+        # 1. Sidebar Frame
+        self.sidebar = tk.Frame(self.main_container, bg=self.sidebar_color, width=280)
+        self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
+        self.sidebar.pack_propagate(False)
         
-        # Header content
-        header_content = tk.Frame(header_frame, bg='#1a1a1a')
-        header_content.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        # Sidebar Content
+        logo_frame = tk.Frame(self.sidebar, bg=self.sidebar_color)
+        logo_frame.pack(pady=(40, 30), padx=20, fill=tk.X)
         
-        # Title - Large and professional
-        title_label = tk.Label(header_content, text="Face-It", 
-                             font=('Segoe UI', 28, 'bold'), bg='#1a1a1a', fg='white')
-        title_label.pack()
+        tk.Label(logo_frame, text="Face-It", font=self.title_font, 
+                 bg=self.sidebar_color, fg=self.text_color).pack(anchor="w")
+        tk.Label(logo_frame, text="AI Attendance System", font=self.small_font, 
+                 bg=self.sidebar_color, fg=self.accent_color).pack(anchor="w")
         
-        # Subtitle - Arctic Blue accent
-        subtitle_label = tk.Label(header_content, text="Advanced AI-Powered Attendance Management", 
-                                 font=('Segoe UI', 12), bg='#1a1a1a', fg='#3498db')
-        subtitle_label.pack(pady=(0, 5))
+        # Navigation Buttons
+        self.nav_buttons = {}
+        nav_items = [
+            ("Dashboard", "□"),
+            ("Camera View", "○"),
+            ("Students", "⊞"),
+            ("Attendance", "▤"),
+            ("Reports", "")
+        ]
         
-        # Separator line
-        sep = tk.Frame(main_container, height=1, bg='#333333')
-        sep.pack(fill=tk.X)
+        nav_container = tk.Frame(self.sidebar, bg=self.sidebar_color)
+        nav_container.pack(fill=tk.X, padx=10)
         
-        # Content Area - using a dedicated frame for the notebook
-        content_frame = tk.Frame(main_container, bg='#121212', padx=30, pady=30)
-        content_frame.pack(fill=tk.BOTH, expand=True)
+        for text, icon in nav_items:
+            # We'll use simple text for now, but style it nicely
+            btn = tk.Button(nav_container, text=f"  {text}", font=self.body_font,
+                           bg=self.sidebar_color, fg=self.muted_text,
+                           activebackground=self.accent_color, activeforeground="white",
+                           bd=0, padx=20, pady=15, anchor="w",
+                           relief='flat', cursor="hand2",
+                           command=lambda t=text: self.switch_tab(t))
+            btn.pack(fill=tk.X, pady=2)
+            self.nav_buttons[text] = btn
+            
+        # 2. Main Content Area
+        self.main_content = tk.Frame(self.main_container, bg=self.bg_color)
+        self.main_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        # Create notebook for tabs
-        self.notebook = ttk.Notebook(content_frame)
-        self.notebook.pack(fill=tk.BOTH, expand=True)
+        # Header Area
+        self.header_frame = tk.Frame(self.main_content, bg=self.surface_color, height=80)
+        self.header_frame.pack(side=tk.TOP, fill=tk.X)
+        self.header_frame.pack_propagate(False)
         
-        # Create tabs
-        self.create_dashboard_tab()
-        self.create_camera_tab()
-        self.create_students_tab()
-        self.create_attendance_tab()
-        self.create_reports_tab()
+        self.header_title = tk.Label(self.header_frame, text="Dashboard", font=self.header_font,
+                                    bg=self.surface_color, fg=self.text_color)
+        self.header_title.pack(side=tk.LEFT, padx=30, pady=25)
         
-        # Set tab names
-        self.notebook.tab(0, text="Dashboard")
-        self.notebook.tab(1, text="Camera View")
-        self.notebook.tab(2, text="Students")
-        self.notebook.tab(3, text="Attendance")
-        self.notebook.tab(4, text="Reports")
+        # Content Container
+        self.content_container = tk.Frame(self.main_content, bg=self.bg_color, padx=30, pady=30)
+        self.content_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Initialize tabs dictionary
+        self.tabs = {}
+        
+        # Create all tabs
+        self.tabs["Dashboard"] = self.create_dashboard_tab()
+        self.tabs["Camera View"] = self.create_camera_tab()
+        self.tabs["Students"] = self.create_students_tab()
+        self.tabs["Attendance"] = self.create_attendance_tab()
+        self.tabs["Reports"] = self.create_reports_tab()
+        
+        # Show initial tab
+        self.switch_tab("Dashboard")
         
         # Populate camera list on startup
         try:
@@ -167,160 +205,169 @@ class FacialAttendanceSystem:
         except Exception as e:
             print(f"Error refreshing cameras on startup: {e}")
         
-        # Status bar
-        self.status_bar = ttk.Label(main_container, text="Ready", relief=tk.SUNKEN, anchor=tk.W)
-        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X, pady=(10, 0))
+        # Status bar - refined for bottom
+        self.status_bar = tk.Label(self.main_content, text="Ready", font=self.small_font,
+                                  bg=self.bg_color, fg=self.muted_text, 
+                                  anchor=tk.W, padx=30, pady=10)
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+
+    def switch_tab(self, tab_name):
+        """Switch between different navigation tabs"""
+        # Update header title
+        if hasattr(self, 'header_title'):
+            self.header_title.config(text=tab_name)
+            
+        # Update button highlights
+        for name, btn in self.nav_buttons.items():
+            if name == tab_name:
+                btn.config(fg=self.accent_color, font=(self.font_family, 10, 'bold'))
+            else:
+                btn.config(fg=self.muted_text, font=self.body_font)
+                
+        # Hide all tab frames
+        for tab in self.tabs.values():
+            tab.pack_forget()
+            
+        # Show the selected tab frame
+        self.tabs[tab_name].pack(fill=tk.BOTH, expand=True)
     
     def create_dashboard_tab(self):
-        """Create the main dashboard tab"""
-        dashboard_frame = ttk.Frame(self.notebook, padding=20)
-        self.notebook.add(dashboard_frame, text="Dashboard")
+        """Create the main dashboard tab with professional cards"""
+        dashboard_frame = tk.Frame(self.content_container, bg=self.bg_color)
         
-        # Dashboard content
-        # Camera control section
-        camera_frame = ttk.LabelFrame(dashboard_frame, text="Camera Control", padding=10)
-        camera_frame.pack(fill=tk.X, padx=10, pady=10)
+        # 1. Stats Cards Row
+        stats_container = tk.Frame(dashboard_frame, bg=self.bg_color)
+        stats_container.pack(fill=tk.X, pady=(0, 20))
         
-        # Camera buttons
-        camera_btn_frame = ttk.Frame(camera_frame)
-        camera_btn_frame.pack(fill=tk.X)
+        def create_stat_card(parent, title, value_attr, icon_text, color):
+            card = tk.Frame(parent, bg=self.surface_color, padx=20, pady=20, 
+                           highlightthickness=1, highlightbackground=self.border_color)
+            card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+            tk.Label(card, text=icon_text, font=(self.font_family, 20), bg=self.surface_color, fg=color).pack(anchor="w")
+            tk.Label(card, text=title, font=self.small_font, bg=self.surface_color, fg=self.muted_text).pack(anchor="w", pady=(5, 0))
+            val_label = tk.Label(card, text="0", font=(self.font_family, 22, 'bold'), bg=self.surface_color, fg=self.text_color)
+            val_label.pack(anchor="w")
+            setattr(self, value_attr, val_label)
+            return card
+
+        create_stat_card(stats_container, "Total Enrolled", "total_students_label", "👥", self.accent_color)
+        create_stat_card(stats_container, "Checked In", "present_today_label", "✓", self.success_color)
+        create_stat_card(stats_container, "Attendance", "attendance_percent_label", "📈", self.warning_color)
+        create_stat_card(stats_container, "Active Session", "total_entries_label", "⏱", self.accent_color)
+
+        # 2. Session Info Card
+        session_card = tk.Frame(dashboard_frame, bg=self.surface_color, padx=25, pady=20,
+                               highlightthickness=1, highlightbackground=self.border_color)
+        session_card.pack(fill=tk.X, pady=(0, 20))
         
-        self.start_camera_btn = ttk.Button(camera_btn_frame, text="Start Camera", 
+        tk.Label(session_card, text="Live Session Analytics", font=self.header_font, bg=self.surface_color, fg=self.text_color).pack(side=tk.LEFT)
+        
+        details_frame = tk.Frame(session_card, bg=self.surface_color)
+        details_frame.pack(side=tk.RIGHT)
+        
+        # In Building
+        tk.Label(details_frame, text="Current In-Building: ", font=self.small_font, bg=self.surface_color, fg=self.muted_text).pack(side=tk.LEFT, padx=(20, 0))
+        self.current_present_label = tk.Label(details_frame, text="0", font=self.header_font, bg=self.surface_color, fg=self.success_color)
+        self.current_present_label.pack(side=tk.LEFT)
+        
+        # Duration
+        tk.Label(details_frame, text="Session Duration: ", font=self.small_font, bg=self.surface_color, fg=self.muted_text).pack(side=tk.LEFT, padx=(20, 0))
+        self.session_duration_label = tk.Label(details_frame, text="00:00:00", font=self.header_font, bg=self.surface_color, fg=self.text_color)
+        self.session_duration_label.pack(side=tk.LEFT)
+        
+        # Exits
+        tk.Label(details_frame, text="Total Exits: ", font=self.small_font, bg=self.surface_color, fg=self.muted_text).pack(side=tk.LEFT, padx=(20, 0))
+        self.total_exits_label = tk.Label(details_frame, text="0", font=self.header_font, bg=self.surface_color, fg=self.danger_color)
+        self.total_exits_label.pack(side=tk.LEFT)
+
+        # 3. Controls Row
+        bottom_container = tk.Frame(dashboard_frame, bg=self.bg_color)
+        bottom_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Camera Control Card
+        cam_card = tk.LabelFrame(bottom_container, text=" Camera System ", font=self.header_font,
+                                bg=self.bg_color, fg=self.accent_color, padx=15, pady=15)
+        cam_card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        
+        self.start_camera_btn = ttk.Button(cam_card, text="Start Camera", 
                                           style='Success.TButton', command=self.start_camera)
-        self.start_camera_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.start_camera_btn.pack(fill=tk.X, pady=5)
         
-        self.stop_camera_btn = ttk.Button(camera_btn_frame, text="Stop Camera", 
+        self.stop_camera_btn = ttk.Button(cam_card, text="Stop Camera", 
                                          style='Danger.TButton', command=self.stop_camera, state=tk.DISABLED)
-        self.stop_camera_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.stop_camera_btn.pack(fill=tk.X, pady=5)
         
-        # Camera info
-        self.camera_info_label = ttk.Label(camera_frame, text="Camera: Not Active")
-        self.camera_info_label.pack(anchor=tk.W, pady=(10, 0))
+        self.camera_info_label = tk.Label(cam_card, text="Camera: Not Active", 
+                                        font=self.small_font, bg=self.bg_color, fg=self.muted_text)
+        self.camera_info_label.pack(pady=5)
+
+        # Tracking Control Card
+        track_card = tk.LabelFrame(bottom_container, text=" Attendance Tracking ", font=self.header_font,
+                                  bg=self.bg_color, fg=self.accent_color, padx=15, pady=15)
+        track_card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0))
         
-        # Attendance tracking section
-        tracking_frame = ttk.LabelFrame(dashboard_frame, text="Attendance Tracking", padding=10)
-        tracking_frame.pack(fill=tk.X, padx=10, pady=10)
+        self.start_tracking_btn = ttk.Button(track_card, text="Start Tracking", 
+                                            command=self.start_tracking, state=tk.DISABLED)
+        self.start_tracking_btn.pack(fill=tk.X, pady=5)
         
-        # Tracking buttons
-        tracking_btn_frame = ttk.Frame(tracking_frame)
-        tracking_btn_frame.pack(fill=tk.X)
+        self.stop_tracking_btn = ttk.Button(track_card, text="Stop Tracking", 
+                                           command=self.stop_tracking, state=tk.DISABLED)
+        self.stop_tracking_btn.pack(fill=tk.X, pady=5)
         
-        self.start_tracking_btn = ttk.Button(tracking_btn_frame, text="Start Tracking", 
-                                            style='Success.TButton', command=self.start_tracking, state=tk.DISABLED)
-        self.start_tracking_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.reset_session_btn = ttk.Button(track_card, text="Reset Session", 
+                                           command=self.reset_session)
+        self.reset_session_btn.pack(fill=tk.X, pady=5)
         
-        self.stop_tracking_btn = ttk.Button(tracking_btn_frame, text="Stop Tracking", 
-                                           style='Danger.TButton', command=self.stop_tracking, state=tk.DISABLED)
-        self.stop_tracking_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        self.reset_session_btn = ttk.Button(tracking_btn_frame, text="Reset Session", 
-                                           style='Warning.TButton', command=self.reset_session)
-        self.reset_session_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        # Statistics section
-        stats_frame = ttk.LabelFrame(dashboard_frame, text="Current Statistics", padding=10)
-        stats_frame.pack(fill=tk.X, padx=10, pady=10)
-        
-        # Stats grid
-        stats_grid = ttk.Frame(stats_frame)
-        stats_grid.pack(fill=tk.X)
-        
-        # Row 1
-        ttk.Label(stats_grid, text="Total Students:").grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        self.total_students_label = ttk.Label(stats_grid, text="0", font=('Segoe UI', 12, 'bold'))
-        self.total_students_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 40))
-        
-        ttk.Label(stats_grid, text="Currently Present:").grid(row=0, column=2, sticky=tk.W, padx=(0, 20))
-        self.current_present_label = ttk.Label(stats_grid, text="0", font=('Segoe UI', 12, 'bold'))
-        self.current_present_label.grid(row=0, column=3, sticky=tk.W, padx=(0, 40))
-        
-        # Row 2
-        ttk.Label(stats_grid, text="Present Today:").grid(row=1, column=0, sticky=tk.W, padx=(0, 20), pady=(10, 0))
-        self.present_today_label = ttk.Label(stats_grid, text="0", font=('Segoe UI', 12, 'bold'))
-        self.present_today_label.grid(row=1, column=1, sticky=tk.W, padx=(0, 40), pady=(10, 0))
-        
-        ttk.Label(stats_grid, text="Attendance %:").grid(row=1, column=2, sticky=tk.W, padx=(0, 20), pady=(10, 0))
-        self.attendance_percent_label = ttk.Label(stats_grid, text="0%", font=('Segoe UI', 12, 'bold'))
-        self.attendance_percent_label.grid(row=1, column=3, sticky=tk.W, padx=(0, 40), pady=(10, 0))
-        
-        # Session info
-        session_frame = ttk.LabelFrame(dashboard_frame, text="Session Information", padding=10)
-        session_frame.pack(fill=tk.X, padx=10, pady=10)
-        
-        session_grid = ttk.Frame(session_frame)
-        session_grid.pack(fill=tk.X)
-        
-        ttk.Label(session_grid, text="Session Duration:").grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        self.session_duration_label = ttk.Label(session_grid, text="00:00:00", font=('Segoe UI', 12, 'bold'))
-        self.session_duration_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 40))
-        
-        ttk.Label(session_grid, text="Total Entries:").grid(row=0, column=2, sticky=tk.W, padx=(0, 20))
-        self.total_entries_label = ttk.Label(session_grid, text="0", font=('Segoe UI', 12, 'bold'))
-        self.total_entries_label.grid(row=0, column=3, sticky=tk.W, padx=(0, 40))
-        
-        ttk.Label(session_grid, text="Total Exits:").grid(row=0, column=4, sticky=tk.W, padx=(0, 20))
-        self.total_exits_label = ttk.Label(session_grid, text="0", font=('Segoe UI', 12, 'bold'))
-        self.total_exits_label.grid(row=0, column=5, sticky=tk.W, padx=(0, 40))
+        return dashboard_frame
     
     def create_camera_tab(self):
-        """Create the camera view tab"""
-        camera_frame = ttk.Frame(self.notebook, padding=20)
-        self.notebook.add(camera_frame, text="Camera View")
+        """Create the camera view tab with an optimized layout"""
+        camera_frame = tk.Frame(self.content_container, bg=self.bg_color)
         
-        # Camera view section
-        camera_view_frame = ttk.LabelFrame(camera_frame, text="Live Camera Feed", padding=10)
-        camera_view_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # Camera Feed Card - Centered and Enlarged
+        feed_container = tk.Frame(camera_frame, bg=self.bg_color)
+        feed_container.pack(fill=tk.BOTH, expand=True)
         
-        # Camera canvas
-        self.camera_canvas = tk.Canvas(camera_view_frame, bg='black', width=640, height=480)
-        self.camera_canvas.pack(pady=10)
+        feed_card = tk.Frame(feed_container, bg=self.surface_color, padx=10, pady=10, 
+                            highlightthickness=1, highlightbackground=self.border_color)
+        feed_card.place(relx=0.5, rely=0.45, anchor="center")
         
-        # Camera controls
-        camera_controls_frame = ttk.Frame(camera_view_frame)
-        camera_controls_frame.pack(fill=tk.X)
+        self.camera_canvas = tk.Canvas(feed_card, bg='black', width=720, height=480, highlightthickness=0)
+        self.camera_canvas.pack()
         
-        # Camera selection
-        ttk.Label(camera_controls_frame, text="Camera:").pack(side=tk.LEFT, padx=(0, 10))
+        # Control Panel Card at Bottom
+        control_card = tk.Frame(camera_frame, bg=self.surface_color, padx=20, pady=15,
+                               highlightthickness=1, highlightbackground=self.border_color)
+        control_card.pack(side=tk.BOTTOM, fill=tk.X, pady=(20, 0))
+        
+        # Camera Selection
+        select_frame = tk.Frame(control_card, bg=self.surface_color)
+        select_frame.pack(side=tk.LEFT)
+        
+        tk.Label(select_frame, text="Active Source:", font=self.small_font, bg=self.surface_color, fg=self.muted_text).pack(side=tk.LEFT, padx=5)
         self.camera_var = tk.StringVar(value="0")
-        self.camera_combo = ttk.Combobox(camera_controls_frame, textvariable=self.camera_var, 
-                                        values=["0", "1", "2"], width=5, state="readonly")
-        self.camera_combo.pack(side=tk.LEFT, padx=(0, 20))
+        self.camera_combo = ttk.Combobox(select_frame, textvariable=self.camera_var, width=5, state="readonly")
+        self.camera_combo.pack(side=tk.LEFT, padx=5)
         
-        # Refresh camera list
-        self.refresh_cameras_btn = ttk.Button(camera_controls_frame, text="Refresh Cameras", 
-                                             command=self.refresh_cameras)
-        self.refresh_cameras_btn.pack(side=tk.LEFT, padx=(0, 20))
+        ttk.Button(select_frame, text="Refresh List", command=self.refresh_cameras).pack(side=tk.LEFT, padx=10)
         
-        # Camera settings
-        settings_frame = ttk.LabelFrame(camera_frame, text="Camera Settings", padding=10)
-        settings_frame.pack(fill=tk.X, padx=10, pady=10)
+        # Settings (Right aligned)
+        settings_frame = tk.Frame(control_card, bg=self.surface_color)
+        settings_frame.pack(side=tk.RIGHT)
         
-        settings_grid = ttk.Frame(settings_frame)
-        settings_grid.pack(fill=tk.X)
-        
-        # Resolution
-        ttk.Label(settings_grid, text="Resolution:").grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        tk.Label(settings_frame, text="Res:", font=self.small_font, bg=self.surface_color, fg=self.muted_text).pack(side=tk.LEFT, padx=5)
         self.resolution_var = tk.StringVar(value="640x480")
-        resolution_combo = ttk.Combobox(settings_grid, textvariable=self.resolution_var, 
-                                       values=["320x240", "640x480", "1280x720"], width=10, state="readonly")
-        resolution_combo.grid(row=0, column=1, sticky=tk.W, padx=(0, 40))
+        ttk.Combobox(settings_frame, textvariable=self.resolution_var, values=["320x240", "640x480", "1280x720"], width=10, state="readonly").pack(side=tk.LEFT, padx=5)
         
-        # FPS
-        ttk.Label(settings_grid, text="FPS:").grid(row=0, column=2, sticky=tk.W, padx=(0, 20))
-        self.fps_var = tk.StringVar(value="30")
-        fps_combo = ttk.Combobox(settings_grid, textvariable=self.fps_var, 
-                                values=["15", "30", "60"], width=5, state="readonly")
-        fps_combo.grid(row=0, column=3, sticky=tk.W, padx=(0, 40))
+        self.apply_settings_btn = ttk.Button(settings_frame, text="Apply Config", style='Primary.TButton', command=self.apply_camera_settings)
+        self.apply_settings_btn.pack(side=tk.LEFT, padx=10)
         
-        # Apply settings button
-        self.apply_settings_btn = ttk.Button(settings_grid, text="Apply Settings", 
-                                            style='Primary.TButton', command=self.apply_camera_settings)
-        self.apply_settings_btn.grid(row=0, column=4, padx=(20, 0))
+        return camera_frame
     
     def create_students_tab(self):
         """Create the students management tab"""
-        students_frame = ttk.Frame(self.notebook, padding=20)
-        self.notebook.add(students_frame, text="Students")
+        students_frame = ttk.Frame(self.content_container, padding=20)
+        # We don't add to notebook anymore, just return the frame
         
         # Add student section
         add_frame = ttk.LabelFrame(students_frame, text="Add New Student", padding=10)
@@ -413,11 +460,12 @@ class FacialAttendanceSystem:
         
         # Load initial student list
         self.refresh_student_list()
+        return students_frame
     
     def create_attendance_tab(self):
         """Create the attendance tracking tab"""
-        attendance_frame = ttk.Frame(self.notebook, padding=20)
-        self.notebook.add(attendance_frame, text="Attendance")
+        attendance_frame = ttk.Frame(self.content_container, padding=20)
+        # We don't add to notebook anymore, just return the frame
         
         # Real-time attendance section
         realtime_frame = ttk.LabelFrame(attendance_frame, text="Real-time Attendance", padding=10)
@@ -468,11 +516,12 @@ class FacialAttendanceSystem:
         self.export_log_btn = ttk.Button(log_controls_frame, text="Export Log", 
                                         style='Primary.TButton', command=self.export_attendance_log)
         self.export_log_btn.pack(side=tk.LEFT)
+        return attendance_frame
     
     def create_reports_tab(self):
         """Create the reports tab"""
-        reports_frame = ttk.Frame(self.notebook, padding=20)
-        self.notebook.add(reports_frame, text="Reports")
+        reports_frame = ttk.Frame(self.content_container, padding=20)
+        # We don't add to notebook anymore, just return the frame
         
         # Daily summary section
         summary_frame = ttk.LabelFrame(reports_frame, text="Daily Summary", padding=10)
@@ -528,7 +577,7 @@ class FacialAttendanceSystem:
         
         # History results
         self.history_text = tk.Text(history_frame, height=10, width=80)
-        self.history_text.pack(fill=tk.BOTH, expand=True)
+        return reports_frame
     
     # Camera control methods
     def start_camera(self):
